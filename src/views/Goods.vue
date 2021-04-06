@@ -1,10 +1,3 @@
-<!--
- * @Description: 全部商品页面组件(包括全部商品,商品分类,商品搜索)
- * @Author: hai-27
- * @Date: 2020-02-07 16:23:00
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-08 12:11:13
- -->
 <template>
   <div class="goods" id="goods" name="goods">
     <!-- 面包屑 -->
@@ -17,7 +10,6 @@
         <el-breadcrumb-item v-if="search">{{search}}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <!-- 面包屑END -->
 
     <!-- 分类标签 -->
     <div class="nav">
@@ -33,7 +25,6 @@
         </el-tabs>
       </div>
     </div>
-    <!-- 分类标签END -->
 
     <!-- 主要内容区 -->
     <div class="main">
@@ -57,39 +48,43 @@
   </div>
 </template>
 <script>
+import { fetchCategory } from "@/api/product"
+import { fetchAllProduct,fetchProductByCearch } from "@/api/product"
 export default {
   data() {
     return {
-      categoryList: "", //分类列表
-      categoryID: [], // 分类id
+      categoryList: null, //分类列表
+      categoryID: 0, // 分类id
       product: "", // 商品列表
       productList: "",
       total: 0, // 商品总量
       pageSize: 15, // 每页显示的商品数量
       currentPage: 1, //当前页码
-      activeName: "-1", // 分类列表当前选中的id
+      activeName: "0", // 分类列表当前选中的id
       search: "" // 搜索条件
     };
   },
   created() {
     // 获取分类列表
     this.getCategory();
+    this.getData();
   },
   activated() {
-    this.activeName = "-1"; // 初始化分类列表当前选中的id为-1
+    this.activeName = "0"; // 初始化分类列表当前选中的id为-1
     this.total = 0; // 初始化商品总量为0
     this.currentPage = 1; //初始化当前页码为1
     // 如果路由没有传递参数，默认为显示全部商品
-    if (Object.keys(this.$route.query).length == 0) {
-      this.categoryID = [];
+    //if (Object.keys(this.$route.query).length == 0) {
+      if (this.$route.query.categoryID ==0) {
+      this.categoryID = 0;
       this.activeName = "0";
       return;
     }
     // 如果路由传递了categoryID，则显示对应的分类商品
     if (this.$route.query.categoryID != undefined) {
       this.categoryID = this.$route.query.categoryID;
-      if (this.categoryID.length == 1) {
-        this.activeName = "" + this.categoryID[0];
+      if (this.categoryID != 0) {
+        this.activeName = "" + this.categoryID;
       }
       return;
     }
@@ -102,10 +97,10 @@ export default {
     // 监听点击了哪个分类标签，通过修改分类id，响应相应的商品
     activeName: function(val) {
       if (val == 0) {
-        this.categoryID = [];
+        this.categoryID = 0;
       }
       if (val > 0) {
-        this.categoryID = [Number(val)];
+        this.categoryID = Number(val);
       }
       // 初始化商品总量和当前页码
       this.total = 0;
@@ -140,7 +135,6 @@ export default {
     }
   },
   methods: {
-    // 返回顶部
     backtop() {
       const timer = setInterval(function() {
         const top = document.documentElement.scrollTop || document.body.scrollTop;
@@ -165,59 +159,42 @@ export default {
     },
     // 向后端请求分类列表数据
     getCategory() {
-      this.$axios
-        .post("/api/product/getCategory", {})
-        .then(res => {
-          const val = {
-            category_id: 0,
-            category_name: "全部"
+      fetchCategory().then(response => {
+        const val = {
+          category_id: 0,
+          category_name: "全部"
           };
-          const cate = res.data.category;
+        const cate = response.category;
           cate.unshift(val);
           this.categoryList = cate;
-        })
-        .catch(err => {
+      }).catch(err => {
           return Promise.reject(err);
         });
     },
     // 向后端请求全部商品或分类商品数据
     getData() {
       // 如果分类列表为空则请求全部商品数据，否则请求分类商品数据
-      const api =
-        this.categoryID.length == 0
-          ? "/api/product/getAllProduct"
-          : "/api/product/getProductByCategory";
-      this.$axios
-        .post(api, {
-          categoryID: this.categoryID,
-          currentPage: this.currentPage,
-          pageSize: this.pageSize
-        })
-        .then(res => {
-          this.product = res.data.Product;
-          this.total = res.data.total;
-        })
-        .catch(err => {
-          return Promise.reject(err);
-        });
+      const api = this.categoryID == 0
+          ? "/product-service/getAllProduct"
+          : "/product-service/getProductByCategory";
+      fetchAllProduct(api,this.categoryID,this.currentPage,this.pageSize).then(response=>{
+            this.product =response.data.items;
+            this.total = response.data.total;
+      }).catch(err => {
+           return Promise.reject(err);
+         });
     },
     // 通过搜索条件向后端请求商品数据
     getProductBySearch() {
-      this.$axios
-        .post("/api/product/getProductBySearch", {
-          search: this.search,
-          currentPage: this.currentPage,
-          pageSize: this.pageSize
-        })
-        .then(res => {
-          this.product = res.data.Product;
-          this.total = res.data.total;
+      fetchProductByCearch(this.search,this.currentPage,this.pageSize)
+        .then(response => {
+          this.product = response.data.items;
+          this.total = response.data.total;
         })
         .catch(err => {
           return Promise.reject(err);
         });
-    }
-  }
+    }}
 };
 </script>
 

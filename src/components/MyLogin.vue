@@ -1,16 +1,13 @@
-<!--
- * @Description: 登录组件
- * @Author: hai-27
- * @Date: 2020-02-19 20:55:17
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-01 15:34:08
- -->
 <template>
   <div id="myLogin">
     <el-dialog title="登录" width="300px" center :visible.sync="isLogin">
       <el-form :model="LoginUser" :rules="rules" status-icon ref="ruleForm" class="demo-ruleForm">
         <el-form-item prop="name">
-          <el-input prefix-icon="el-icon-user-solid" placeholder="请输入账号" v-model="LoginUser.name"></el-input>
+          <el-input 
+            prefix-icon="el-icon-user-solid" 
+            placeholder="请输入账号" 
+            v-model="LoginUser.name"
+            ></el-input>
         </el-form-item>
         <el-form-item prop="pass">
           <el-input
@@ -29,6 +26,7 @@
 </template>
 <script>
 import { mapActions } from "vuex";
+import { fetchLogin } from '@/api/user';
 
 export default {
   name: "MyLogin",
@@ -94,28 +92,28 @@ export default {
       this.$refs["ruleForm"].validate(valid => {
         //如果通过校验开始登录
         if (valid) {
-          this.$axios
-            .post("/api/users/login", {
-              userName: this.LoginUser.name,
-              password: this.LoginUser.pass
-            })
-            .then(res => {
+          // this.$axios.post("/api/users/login", {
+          //     userName: this.LoginUser.name,
+          //     password: this.LoginUser.pass
+          //   })
+          fetchLogin(this.LoginUser.name,this.LoginUser.pass)
+            .then(response => {
               // “001”代表登录成功，其他的均为失败
-              if (res.data.code === "001") {
+              if (response.code === 20000) {
                 // 隐藏登录组件
                 this.isLogin = false;
                 // 登录信息存到本地
-                let user = JSON.stringify(res.data.user);
+                let user = JSON.stringify(response.data);
                 localStorage.setItem("user", user);
                 // 登录信息存到vuex
-                this.setUser(res.data.user);
+                this.setUser(response.data);
                 // 弹出通知框提示登录成功信息
-                this.notifySucceed(res.data.msg);
+                this.notifySucceed(response.message);
               } else {
                 // 清空输入框的校验状态
                 this.$refs["ruleForm"].resetFields();
                 // 弹出通知框提示登录失败信息
-                this.notifyError(res.data.msg);
+                this.notifyError(response.message);
               }
             })
             .catch(err => {

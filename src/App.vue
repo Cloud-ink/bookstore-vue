@@ -25,7 +25,7 @@
                   <el-button size="mini" type="text" @click="visible = false">取消</el-button>
                   <el-button type="primary" size="mini" @click="logout">确定</el-button>
                 </div>
-                <el-button type="text" slot="reference">{{this.$store.getters.getUser.userName}}</el-button>
+                <el-button type="text" slot="reference">{{this.$store.getters.getUser.user_name}}</el-button>
               </el-popover>
             </li>
             <li>
@@ -56,7 +56,15 @@
         >
           <div class="logo">
             <router-link to="/">
-              <img src="./assets/imgs/logo.png" alt />
+              <!-- <img width="200" src="http://localhost:8090/carousel/Capture.PNG" alt />  -->
+              <img src="./assets/imgs/logo.png" alt /> 
+              <!-- <img :src="$target +img/carousel/l1.jpg" width="200" alt /> -->
+              <!-- <img src="$target+img/carousel/l1.jpg" alt />  -->
+              <!-- <img :src="$target +img/carousel/l1.jpg" alt /> -->
+              <!-- <img src = "https://cn.bing.com/images/search?q=%e5%9b%be%e7%89%87&id=30F17E5E82E60965C796B028126FB967F991CBBB&FORM=IQFRBA"> -->
+              <!-- <img src="http://localhost:8090/getImg2" alt /> -->
+              <!-- <img src="http://106.15.179.105:3000/public/imgs/phone/picture/Redmi%20K30%205G-3.jpg" alt /> -->
+              <!-- <img src="img/Capture.PNG" alt /> -->
             </router-link>
           </div>
           <el-menu-item index="/">首页</el-menu-item>
@@ -122,6 +130,7 @@
 <script>
 import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
+import { getCart } from "@/api/shoppingcart"
 
 export default {
   beforeUpdate() {
@@ -165,17 +174,19 @@ export default {
         this.setShoppingCart([]);
       } else {
         // 用户已经登录,获取该用户的购物车信息
-        this.$axios
-          .post("/api/user/shoppingCart/getShoppingCart", {
-            user_id: val.user_id
-          })
-          .then(res => {
-            if (res.data.code === "001") {
+        // this.$axios
+        //   .post("/api/user/shoppingCart/getShoppingCart", {
+        //     user_id: val.user_id
+        //   })
+        getCart(this.$store.getters.getUser.user_id)
+          .then(response => {
+            if (response.code === 20000) {
               // 001 为成功, 更新vuex购物车状态
-              this.setShoppingCart(res.data.shoppingCartData);
+              this.setShoppingCart(response.data);
+             
             } else {
               // 提示失败信息
-              this.notifyError(res.data.msg);
+              this.notifyError(response.msg);
             }
           })
           .catch(err => {

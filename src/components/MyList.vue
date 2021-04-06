@@ -1,10 +1,3 @@
-<!--
- * @Description: 列表组件，用于首页、全部商品页面的商品列表
- * @Author: hai-27
- * @Date: 2020-02-07 16:23:00
- * @LastEditors: hai-27
- * @LastEditTime: 2020-04-05 13:22:22
- -->
 <template>
   <div id="myList" class="myList">
     <ul>
@@ -17,9 +10,9 @@
           <i class="el-icon-close delete" slot="reference" v-show="isDelete"></i>
         </el-popover>
         <router-link :to="{ path: '/goods/details', query: {productID:item.product_id} }">
-          <img :src="$target +item.product_picture" alt />
+          <img :src="item.product_image" alt />
           <h2>{{item.product_name}}</h2>
-          <h3>{{item.product_title}}</h3>
+          <h3>{{item.product_subtitle}}</h3>
           <p>
             <span>{{item.product_selling_price}}元</span>
             <span
@@ -39,6 +32,7 @@
   </div>
 </template>
 <script>
+import { deleteCollections } from "@/api/collect"
 export default {
   name: "MyList",
   // list为父组件传过来的商品列表
@@ -64,14 +58,15 @@ export default {
   },
   methods: {
     deleteCollect(product_id) {
-      this.$axios
-        .post("/api/user/collect/deleteCollect", {
-          user_id: this.$store.getters.getUser.user_id,
-          product_id: product_id
-        })
-        .then(res => {
-          switch (res.data.code) {
-            case "001":
+      // this.$axios
+      //   .post("/api/user/collect/deleteCollect", {
+      //     user_id: this.$store.getters.getUser.user_id,
+      //     product_id: product_id
+      //   })
+      deleteCollections(this.$store.getters.getUser.user_id,product_id)
+        .then(Response => {
+          switch (Response.code) {
+            case 20000:
               // 删除成功
               // 删除删除列表中的该商品信息
               for (let i = 0; i < this.list.length; i++) {
@@ -81,11 +76,11 @@ export default {
                 }
               }
               // 提示删除成功信息
-              this.notifySucceed(res.data.msg);
+              this.notifySucceed(Response.msg);
               break;
             default:
               // 提示删除失败信息
-              this.notifyError(res.data.msg);
+              this.notifyError(Response.msg);
           }
         })
         .catch(err => {

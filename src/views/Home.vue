@@ -1,45 +1,41 @@
-<!--
- * @Description: 首页组件
- * @Author: hai-27
- * @Date: 2020-02-07 16:23:00
- * @LastEditors: hai-27
- * @LastEditTime: 2020-02-27 13:36:12
- -->
 <template>
   <div class="home" id="home" name="home">
     <!-- 轮播图 -->
     <div class="block">
       <el-carousel height="460px">
         <el-carousel-item v-for="item in carousel" :key="item.carousel_id">
-          <img style="height:460px;" :src="$target + item.imgPath" :alt="item.describes" />
+          <!-- <img style="height:460px;" :src="$target + item.imgPath" :alt="item.describes" /> -->
+          <img style="height:460px;" :src="item.carousel_img" :alt="item.carousel_name"/>
         </el-carousel-item>
       </el-carousel>
     </div>
-    <!-- 轮播图END -->
     <div class="main-box">
       <div class="main">
-        <!-- 手机商品展示区域 -->
+        <!-- 教辅书展示区域 -->
         <div class="phone">
           <div class="box-hd">
-            <div class="title">手机</div>
+            <div class="title">教辅书</div>
           </div>
-          <div class="box-bd">
+          <div class="box-bd" >
             <div class="promo-list">
-              <router-link to>
-                <img :src="$target +'public/imgs/phone/phone.png'" />
-              </router-link>
+              <!-- <router-link to> -->
+                <ul>
+                <li>
+                <img src="https://cloud-ink.oss-cn-shanghai.aliyuncs.com/bookstore/img/category/category1.jpg" />
+              <!-- </router-link> -->
+                </li>
+                </ul>
             </div>
             <div class="list">
-              <MyList :list="phoneList" :isMore="true"></MyList>
+              <MyList :list="teacherList" :isMore="true"></MyList>
             </div>
           </div>
         </div>
-        <!-- 手机商品展示区域END -->
 
         <!-- 家电商品展示区域 -->
         <div class="appliance" id="promo-menu">
           <div class="box-hd">
-            <div class="title">家电</div>
+            <div class="title">儿童书</div>
             <div class="more" id="more">
               <MyMenu :val="2" @fromChild="getChildMsg">
                 <span slot="1">热门</span>
@@ -51,24 +47,20 @@
             <div class="promo-list">
               <ul>
                 <li>
-                  <img :src="$target +'public/imgs/appliance/appliance-promo1.png'" />
-                </li>
-                <li>
-                  <img :src="$target +'public/imgs/appliance/appliance-promo2.png'" />
+                  <img src="https://cloud-ink.oss-cn-shanghai.aliyuncs.com/bookstore/img/category/category2.jpg" />
                 </li>
               </ul>
             </div>
             <div class="list">
-              <MyList :list="applianceList" :isMore="true"></MyList>
+              <MyList :list="childerList" :isMore="true"></MyList>
             </div>
           </div>
         </div>
-        <!-- 家电商品展示区域END -->
 
         <!-- 配件商品展示区域 -->
         <div class="accessory" id="promo-menu">
           <div class="box-hd">
-            <div class="title">配件</div>
+            <div class="title">小说</div>
             <div class="more" id="more">
               <MyMenu :val="3" @fromChild="getChildMsg2">
                 <span slot="1">热门</span>
@@ -81,15 +73,12 @@
             <div class="promo-list">
               <ul>
                 <li>
-                  <img :src="$target +'public/imgs/accessory/accessory-promo1.png'" alt />
-                </li>
-                <li>
-                  <img :src="$target +'public/imgs/accessory/accessory-promo2.png'" alt />
+                  <img src="https://cloud-ink.oss-cn-shanghai.aliyuncs.com/bookstore/img/category/category3.jpg" alt />
                 </li>
               </ul>
             </div>
             <div class="list">
-              <MyList :list="accessoryList" :isMore="true"></MyList>
+              <MyList :list="novelList" :isMore="true"></MyList>
             </div>
           </div>
         </div>
@@ -99,18 +88,19 @@
   </div>
 </template>
 <script>
+import { fetchCarousel,fetchProductByCategoryName } from "@/api/product"
 export default {
-  data() {
+  data() {  
     return {
       carousel: "", // 轮播图数据
-      phoneList: "", // 手机商品列表
-      miTvList: "", // 小米电视商品列表
-      applianceList: "", // 家电商品列表
-      applianceHotList: "", //热门家电商品列表
-      accessoryList: "", //配件商品列表
+      teacherList: "", // 教辅书列表
+      childerList: "", // 儿童书列表
+      novelList: "", // 小说列表
+      //applianceHotList: "", //热门家电商品列表
+      //accessoryList: "", //配件商品列表
       accessoryHotList: "", //热门配件商品列表
       protectingShellList: "", // 保护套商品列表
-      chargerList: "", //充电器商品列表
+      //chargerList: "", //充电器商品列表
       applianceActive: 1, // 家电当前选中的商品分类
       accessoryActive: 1 // 配件当前选中的商品分类
     };
@@ -159,29 +149,30 @@ export default {
   },
   created() {
     // 获取轮播图数据
-    this.$axios
-      .post("/api/resources/carousel", {})
-      .then(res => {
-        this.carousel = res.data.carousel;
+    // this.$axios
+    //   .post("/api/resources/carousel", {})
+    fetchCarousel()
+      .then(response => {
+        this.carousel = response.data;
       })
       .catch(err => {
         return Promise.reject(err);
       });
     // 获取各类商品数据
-    this.getPromo("手机", "phoneList");
-    this.getPromo("电视机", "miTvList");
-    this.getPromo("保护套", "protectingShellList");
-    this.getPromo("充电器", "chargerList");
-    this.getPromo(
-      ["电视机", "空调", "洗衣机"],
-      "applianceList",
-      "/api/product/getHotProduct"
-    );
-    this.getPromo(
-      ["保护套", "保护膜", "充电器", "充电宝"],
-      "accessoryList",
-      "/api/product/getHotProduct"
-    );
+    this.getPromo("教辅书", "teacherList");
+    this.getPromo("儿童书", "childerList");
+    this.getPromo("小说", "novelList");
+    //this.getPromo("充电器", "chargerList");
+    // this.getPromo(
+    //   //["电视机", "空调", "洗衣机"],
+    //   "applianceList",
+    //   "/api/product/getHotProduct"
+    // );
+    // this.getPromo(
+    //   ["保护套", "保护膜", "充电器", "充电宝"],
+    //   "accessoryList",
+    //   "/api/product/getHotProduct"
+    // );
   },
   methods: {
     // 获取家电模块子组件传过来的数据
@@ -194,13 +185,15 @@ export default {
     },
     // 获取各类商品数据方法封装
     getPromo(categoryName, val, api) {
-      api = api != undefined ? api : "/api/product/getPromoProduct";
-      this.$axios
-        .post(api, {
-          categoryName
-        })
-        .then(res => {
-          this[val] = res.data.Product;
+       api = api != undefined ? api : "/product-service/getPromoProduct";
+      // this.$axios
+      //   .post(api, {
+      //     categoryName
+      //   })
+      //if(api=undefined){
+        fetchProductByCategoryName(api,categoryName)
+        .then(response => {
+          this[val] = response.data;
         })
         .catch(err => {
           return Promise.reject(err);
@@ -210,5 +203,8 @@ export default {
 };
 </script>
 <style scoped>
+box-bd {
+  height: 315px;
+}
 @import "../assets/css/index.css";
 </style>

@@ -1,10 +1,3 @@
-<!--
- * @Description: 用户注册组件
- * @Author: hai-27
- * @Date: 2020-02-19 22:20:35
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-01 15:34:34
- -->
 <template>
   <div id="register">
     <el-dialog title="注册" width="300px" center :visible.sync="isRegister">
@@ -46,6 +39,8 @@
   </div>
 </template>
 <script>
+import{ findUserName } from "@/api/user"
+import{ fetchRegister } from "@/api/user"
 export default {
   name: "MyRegister",
   props: ["register"],
@@ -59,17 +54,18 @@ export default {
       const userNameRule = /^[a-zA-Z][a-zA-Z0-9_]{4,15}$/;
       if (userNameRule.test(value)) {
         //判断数据库中是否已经存在该用户名
-        this.$axios
-          .post("/api/users/findUserName", {
-            userName: this.RegisterUser.name
-          })
-          .then(res => {
+        // this.$axios
+        //   .post("/api/users/findUserName", {
+        //     userName: this.RegisterUser.name
+        //   })
+        findUserName(this.RegisterUser.name)
+          .then(reponse => {
             // “001”代表用户名不存在，可以注册
-            if (res.data.code == "001") {
+            if (reponse.code == 20000) {
               this.$refs.ruleForm.validateField("checkPass");
               return callback();
             } else {
-              return callback(new Error(res.data.msg));
+              return callback(new Error(reponse.msg));
             }
           })
           .catch(err => {
@@ -144,21 +140,22 @@ export default {
       this.$refs["ruleForm"].validate(valid => {
         //如果通过校验开始注册
         if (valid) {
-          this.$axios
-            .post("/api/users/register", {
-              userName: this.RegisterUser.name,
-              password: this.RegisterUser.pass
-            })
-            .then(res => {
+          // this.$axios
+          //   .post("/api/users/register", {
+          //     userName: this.RegisterUser.name,
+          //     password: this.RegisterUser.pass
+          //   })
+            fetchRegister(this.RegisterUser.name,this.RegisterUser.pass)
+            .then(response => {
               // “001”代表注册成功，其他的均为失败
-              if (res.data.code === "001") {
+              if (response.code === 20000) {
                 // 隐藏注册组件
                 this.isRegister = false;
                 // 弹出通知框提示注册成功信息
-                this.notifySucceed(res.data.msg);
+                this.notifySucceed(response.msg);
               } else {
                 // 弹出通知框提示注册失败信息
-                this.notifyError(res.data.msg);
+                this.notifyError(response.msg);
               }
             })
             .catch(err => {

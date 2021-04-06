@@ -1,10 +1,3 @@
-<!--
- * @Description: 我的收藏页面组件
- * @Author: hai-27
- * @Date: 2020-02-20 17:22:56
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-12 19:34:00
- -->
 <template>
   <div class="collect">
     <!-- Add a static page for my favorite module -->
@@ -30,6 +23,7 @@
   </div>
 </template>
 <script>
+import { getCollect } from "@/api/collect";
 export default {
   data() {
     return {
@@ -38,14 +32,16 @@ export default {
   },
   activated() {
     // 获取收藏数据
-    this.$axios
-      .post("/api/user/collect/getCollect", {
-        user_id: this.$store.getters.getUser.user_id
-      })
-      .then(res => {
-        if (res.data.code === "001") {
-          this.collectList = res.data.collectList;
-        }
+    // this.$axios
+    //   .post("/api/user/collect/getCollect", {
+    //     user_id: this.$store.getters.getUser.user_id
+    //   })
+    getCollect(this.$store.getters.getUser.user_id)
+      .then(response => {
+       if (response.code === 20000) {
+        //   this.collectList = res.data.collectList;;
+        this.collectList=response.data;
+       }
       })
       .catch(err => {
         return Promise.reject(err);

@@ -1,10 +1,3 @@
-<!--
- * @Description: 确认订单页面组件
- * @Author: hai-27
- * @Date: 2020-02-23 23:46:39
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-29 13:10:21
- -->
 <template>
   <div class="confirmOrder">
     <!-- 头部 -->
@@ -127,6 +120,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { mapActions } from "vuex";
+//import { addMyOrder } from "@/api/order";
 export default {
   name: "",
   data() {
@@ -155,6 +149,7 @@ export default {
     if (this.getCheckNum < 1) {
       this.notifyError("请勾选商品后再结算");
       this.$router.push({ path: "/shoppingCart" });
+      // alert(this.$store.getters.getUser.user_id);
     }
   },
   computed: {
@@ -165,15 +160,17 @@ export default {
     ...mapActions(["deleteShoppingCart"]),
     addOrder() {
       this.$axios
-        .post("/api/user/order/addOrder", {
-          user_id: this.$store.getters.getUser.user_id,
-          products: this.getCheckGoods
-        })
+        .post("/order-service/addOrder", {
+          user_id: 
+          this.$store.getters.getUser.user_id,
+          products: this.getCheckGoods}
+        )
+      //addMyOrder(this.$store.getters.getUser.user_id,this.getCheckGoods)
         .then(res => {
           let products = this.getCheckGoods;
           switch (res.data.code) {
             // “001”代表结算成功
-            case "001":
+            case 20000:
               for (let i = 0; i < products.length; i++) {
                 const temp = products[i];
                 // 删除已经结算的购物车商品

@@ -1,10 +1,3 @@
-<!--
- * @Description: 我的订单页面组件
- * @Author: hai-27
- * @Date: 2020-02-20 17:21:54
- * @LastEditors: hai-27
- * @LastEditTime: 2020-02-27 13:36:27
- -->
 <template>
   <div class="order">
     <!-- 我的订单头部 -->
@@ -16,7 +9,6 @@
         </p>
       </div>
     </div>
-    <!-- 我的订单头部END -->
 
     <!-- 我的订单主要内容 -->
     <div class="order-content" v-if="orders.length>0">
@@ -25,10 +17,10 @@
           <!-- 我的订单表头 -->
           <li class="order-info">
             <div class="order-id">订单编号: {{item[0].order_id}}</div>
-            <div class="order-time">订单时间: {{item[0].order_time | dateFormat}}</div>
+            <!-- <div class="order-time">订单时间: {{item[0].order_time | dateFormat}}</div> -->
           </li>
           <li class="header">
-            <div class="pro-img"></div>
+            <div class="pro-img">图片</div>
             <div class="pro-name">商品名称</div>
             <div class="pro-price">单价</div>
             <div class="pro-num">数量</div>
@@ -40,13 +32,12 @@
           <li class="product-list" v-for="(product,i) in item" :key="i">
             <div class="pro-img">
               <router-link :to="{ path: '/goods/details', query: {productID:product.product_id} }">
-                <img :src="$target + product.product_picture" />
+                <img :src="$target +product.product_image" alt />
               </router-link>
             </div>
             <div class="pro-name">
-              <router-link
-                :to="{ path: '/goods/details', query: {productID:product.product_id} }"
-              >{{product.product_name}}</router-link>
+              <router-link :to="{ path: '/goods/details', query: {productID:product.product_id} }">
+                {{product.product_name}}</router-link>
             </div>
             <div class="pro-price">{{product.product_price}}元</div>
             <div class="pro-num">{{product.product_num}}</div>
@@ -84,6 +75,7 @@
   </div>
 </template>
 <script>
+import { getAllOrder } from "@/api/order";
 export default {
   data() {
     return {
@@ -93,16 +85,19 @@ export default {
   },
   activated() {
     // 获取订单数据
-    this.$axios
-      .post("/api/user/order/getOrder", {
-        user_id: this.$store.getters.getUser.user_id
-      })
-      .then(res => {
-        if (res.data.code === "001") {
-          this.orders = res.data.orders;
-        } else {
-          this.notifyError(res.data.msg);
-        }
+    // this.$axios
+    //   .post("/api/user/order/getOrder", {
+    //     user_id: this.$store.getters.getUser.user_id
+    //   })
+    getAllOrder(this.$store.getters.getUser.user_id)
+      .then(response => {
+        // if (response.code === "001") {
+        //   this.orders = res.data.orders;
+        // } else {
+        //   this.notifyError(res.data.msg);
+        // }
+        this.orders = [response.data];
+        // alert(this.orders);
       })
       .catch(err => {
         return Promise.reject(err);

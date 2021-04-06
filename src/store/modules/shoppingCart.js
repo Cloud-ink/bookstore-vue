@@ -1,13 +1,6 @@
-/*
- * @Description: 购物车状态模块
- * @Author: hai-27
- * @Date: 2020-02-21 18:40:41
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-07 20:38:55
- */
 export default {
   state: {
-    shoppingCart: []
+    shoppingCart: [ ]
     // shoppingCart结构
     /* 
     shoppingCart = {
@@ -31,7 +24,7 @@ export default {
       let totalNum = 0;
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        totalNum += temp.num;
+        totalNum += temp.cart_num;
       }
       return totalNum;
     },
@@ -41,7 +34,7 @@ export default {
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
         // 只要有一个商品没有勾选立即return false;
-        if (!temp.check) {
+        if (!temp.cart_checked) {
           isAllCheck = false;
           return isAllCheck;
         }
@@ -54,7 +47,19 @@ export default {
       let checkGoods = [];
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.check) {
+        if (temp.cart_checked) {
+          checkGoods.push(temp);
+        }
+      }
+      return checkGoods;
+    },
+    getCheckGood (state) {
+      // 获取勾选的商品信息
+      // 用于确认订单页面
+      let checkGoods = [];
+      for (let i = 0; i < state.shoppingCart.length; i++) {
+        const temp = state.shoppingCart[i];
+        if (temp.cart_checked) {
           checkGoods.push(temp);
         }
       }
@@ -65,8 +70,8 @@ export default {
       let totalNum = 0;
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.check) {
-          totalNum += temp.num;
+        if (temp.cart_checked) {
+          totalNum += temp.cart_num;
         }
       }
       return totalNum;
@@ -76,8 +81,8 @@ export default {
       let totalPrice = 0;
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.check) {
-          totalPrice += temp.price * temp.num;
+        if (temp.cart_checked) {
+          totalPrice += temp.product_price * temp.cart_num;
         }
       }
       return totalPrice;
@@ -97,9 +102,9 @@ export default {
       // 更新购物车
       // 可更新商品数量和是否勾选
       // 用于购物车点击勾选及加减商品数量
-      if (payload.prop == "num") {
+      if (payload.prop == "cart_num") {
         // 判断效果的商品数量是否大于限购数量或小于1
-        if (state.shoppingCart[payload.key].maxNum < payload.val) {
+        if (state.shoppingCart[payload.key].product_stock < payload.val) {
           return;
         }
         if (payload.val < 1) {
@@ -108,6 +113,7 @@ export default {
       }
       // 根据商品在购物车的数组的索引和属性更改
       state.shoppingCart[payload.key][payload.prop] = payload.val;
+      
     },
     addShoppingCartNum (state, productID) {
       // 增加购物车商品数量
@@ -121,11 +127,11 @@ export default {
         }
       }
     },
-    deleteShoppingCart (state, id) {
+    deleteShoppingCart (state, cart_id) {
       // 根据购物车id删除购物车商品
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.id == id) {
+        if (temp.cart_id == cart_id) {
           state.shoppingCart.splice(i, 1);
         }
       }
@@ -133,7 +139,7 @@ export default {
     checkAll (state, data) {
       // 点击全选按钮，更改每个商品的勾选状态
       for (let i = 0; i < state.shoppingCart.length; i++) {
-        state.shoppingCart[i].check = data;
+        state.shoppingCart[i].cart_checked = data;
       }
     }
   },
