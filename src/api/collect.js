@@ -1,25 +1,25 @@
 import request from '@/utils/request'
 
-export function getCollect(user_id){
+export function getCollect(userId){
   return request({
-    url: '/order-service/getCollect',
+    url: '/product-service/product/getCollect',
     method: 'post',
-    params:{user_id}
+    params:{userId}
   })
 }
 
-export function addCollections(user_id,product_id){
+export function addCollections(userId,productId){
     return request({
-      url: '/order-service/addCollect',
+      url: '/product-service/product/addCollect',
       method: 'post',
-      params:{user_id,product_id}
+      params:{userId,productId}
     })
   }
 
-export function deleteCollections(user_id,product_id){
+export function deleteCollections(userId,productId){
   return request({
-    url: '/order-service/deleteCollect',
+    url: '/product-service/product/deleteCollect',
     method: 'post',
-    params:{user_id,product_id}
+    params:{userId,productId}
   })
 }

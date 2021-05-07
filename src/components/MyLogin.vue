@@ -2,19 +2,19 @@
   <div id="myLogin">
     <el-dialog title="登录" width="300px" center :visible.sync="isLogin">
       <el-form :model="LoginUser" :rules="rules" status-icon ref="ruleForm" class="demo-ruleForm">
-        <el-form-item prop="name">
+        <el-form-item prop="username">
           <el-input 
             prefix-icon="el-icon-user-solid" 
             placeholder="请输入账号" 
-            v-model="LoginUser.name"
+            v-model="LoginUser.username"
             ></el-input>
         </el-form-item>
-        <el-form-item prop="pass">
+        <el-form-item prop="password">
           <el-input
             prefix-icon="el-icon-view"
             type="password"
             placeholder="请输入密码"
-            v-model="LoginUser.pass"
+            v-model="LoginUser.password"
           ></el-input>
         </el-form-item>
         <el-form-item>
@@ -27,6 +27,7 @@
 <script>
 import { mapActions } from "vuex";
 import { fetchLogin } from '@/api/user';
+import cookie from 'js-cookie';
 
 export default {
   name: "MyLogin",
@@ -63,8 +64,8 @@ export default {
     };
     return {
       LoginUser: {
-        name: "",
-        pass: ""
+        username: "",
+        password: ""
       },
       // 用户信息校验规则,validator(校验方法),trigger(触发方式),blur为在组件 Input 失去焦点时触发
       rules: {
@@ -92,21 +93,16 @@ export default {
       this.$refs["ruleForm"].validate(valid => {
         //如果通过校验开始登录
         if (valid) {
-          // this.$axios.post("/api/users/login", {
-          //     userName: this.LoginUser.name,
-          //     password: this.LoginUser.pass
-          //   })
-          fetchLogin(this.LoginUser.name,this.LoginUser.pass)
-            .then(response => {
+          fetchLogin(this.LoginUser).then(response => {
               // “001”代表登录成功，其他的均为失败
               if (response.code === 20000) {
                 // 隐藏登录组件
                 this.isLogin = false;
-                // 登录信息存到本地
-                let user = JSON.stringify(response.data);
-                localStorage.setItem("user", user);
-                // 登录信息存到vuex
-                this.setUser(response.data);
+                //登录信息存到cookie（名称，令牌，{domin:‘父域名’}）
+                cookie.set('bookstore',response.data.token,{ domain: 'localhost'});
+                //跳转到网站首页  window.location.href='/'
+                window.location.href = "/"
+
                 // 弹出通知框提示登录成功信息
                 this.notifySucceed(response.message);
               } else {

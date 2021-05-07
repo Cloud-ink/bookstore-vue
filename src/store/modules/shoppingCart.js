@@ -1,6 +1,6 @@
 export default {
   state: {
-    shoppingCart: [ ]
+    shoppingCart: []
     // shoppingCart结构
     /* 
     shoppingCart = {
@@ -19,12 +19,22 @@ export default {
       // 获取购物车状态
       return state.shoppingCart;
     },
+    getCheckGood(state){
+      let goods = [];
+      for(let i = 0; i< state.shoppingCart.length; i++){
+        const temp = state.shoppingCart[i];
+        if (temp.cartChecked == 1) {
+          goods.push(temp.productId);
+        }
+      }
+      return goods;
+    },
     getNum (state) {
       // 购物车商品总数量
       let totalNum = 0;
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        totalNum += temp.cart_num;
+        totalNum += temp.cartNum;
       }
       return totalNum;
     },
@@ -34,7 +44,7 @@ export default {
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
         // 只要有一个商品没有勾选立即return false;
-        if (!temp.cart_checked) {
+        if (!temp.cartChecked) {
           isAllCheck = false;
           return isAllCheck;
         }
@@ -47,19 +57,7 @@ export default {
       let checkGoods = [];
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.cart_checked) {
-          checkGoods.push(temp);
-        }
-      }
-      return checkGoods;
-    },
-    getCheckGood (state) {
-      // 获取勾选的商品信息
-      // 用于确认订单页面
-      let checkGoods = [];
-      for (let i = 0; i < state.shoppingCart.length; i++) {
-        const temp = state.shoppingCart[i];
-        if (temp.cart_checked) {
+        if (temp.cartChecked) {
           checkGoods.push(temp);
         }
       }
@@ -70,8 +68,8 @@ export default {
       let totalNum = 0;
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.cart_checked) {
-          totalNum += temp.cart_num;
+        if (temp.cartChecked) {
+          totalNum += temp.cartNum;
         }
       }
       return totalNum;
@@ -81,8 +79,8 @@ export default {
       let totalPrice = 0;
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.cart_checked) {
-          totalPrice += temp.product_price * temp.cart_num;
+        if (temp.cartChecked) {
+          totalPrice += temp.productPrice * temp.cartNum;
         }
       }
       return totalPrice;
@@ -102,9 +100,9 @@ export default {
       // 更新购物车
       // 可更新商品数量和是否勾选
       // 用于购物车点击勾选及加减商品数量
-      if (payload.prop == "cart_num") {
+      if (payload.prop == "cartNum") {
         // 判断效果的商品数量是否大于限购数量或小于1
-        if (state.shoppingCart[payload.key].product_stock < payload.val) {
+        if (state.shoppingCart[payload.key].productStock < payload.val) {
           return;
         }
         if (payload.val < 1) {
@@ -115,23 +113,23 @@ export default {
       state.shoppingCart[payload.key][payload.prop] = payload.val;
       
     },
-    addShoppingCartNum (state, productID) {
+    addShoppingCartNum (state, productId) {
       // 增加购物车商品数量
       // 用于在商品详情页点击添加购物车,后台返回002，“该商品已在购物车，数量 +1”，更新vuex的商品数量
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.productID == productID) {
+        if (temp.productId == productId) {
           if (temp.num < temp.maxNum) {
             temp.num++;
           }
         }
       }
     },
-    deleteShoppingCart (state, cart_id) {
+    deleteShoppingCart (state, productId) {
       // 根据购物车id删除购物车商品
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.cart_id == cart_id) {
+        if (temp.productId == productId) {
           state.shoppingCart.splice(i, 1);
         }
       }
@@ -139,7 +137,7 @@ export default {
     checkAll (state, data) {
       // 点击全选按钮，更改每个商品的勾选状态
       for (let i = 0; i < state.shoppingCart.length; i++) {
-        state.shoppingCart[i].cart_checked = data;
+        state.shoppingCart[i].cartChecked = data;
       }
     }
   },
@@ -153,8 +151,8 @@ export default {
     updateShoppingCart ({ commit }, payload) {
       commit('updateShoppingCart', payload);
     },
-    addShoppingCartNum ({ commit }, productID) {
-      commit('addShoppingCartNum', productID);
+    addShoppingCartNum ({ commit }, productId) {
+      commit('addShoppingCartNum', productId);
     },
     deleteShoppingCart ({ commit }, id) {
       commit('deleteShoppingCart', id);

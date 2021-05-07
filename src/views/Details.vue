@@ -3,7 +3,7 @@
     <!-- 头部 -->
     <div class="page-header">
       <div class="title">
-        <p>{{productDetails.product_name}}</p>
+        <p>{{productDetails.productName}}</p>
         <div class="list">
           <ul>
             <li>
@@ -25,17 +25,17 @@
     <div class="main">
       <!-- 左侧商品轮播图 -->
       <div class="block">
-        <!-- <el-carousel height="560px" v-if="productPicture.length>1">
+        <!-- <el-carousel height="560px" v-if="ProductImage.length>1">
           <el-carousel height="560px">
-          <el-carousel-item v-for="item in productPicture" :key="item.id">
+          <el-carousel-item v-for="item in ProductImage" :key="item.id">
             <img style="height:560px;" src="https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1730713693,2130926401&fm=26&gp=0.jpg" :alt="item.intro" />
           </el-carousel-item>
         </el-carousel> -->
-        <div v-if="productPicture.length==1">
+        <div v-if="ProductImage.length==1">
           <img
             style="height:560px;"
-            :src="$target + productPicture[0].product_picture"
-            :alt="productPicture[0].intro"
+            :src="$target + ProductImage[0].ProductImage"
+            :alt="ProductImage[0].intro"
           />
         </div>
       </div>
@@ -43,27 +43,27 @@
 
       <!-- 右侧内容区 -->
       <div class="content">
-        <h1 class="name">{{productDetails.product_name}}</h1>
-        <p class="intro">{{productDetails.product_intro}}</p>
+        <h1 class="name">{{productDetails.productName}}</h1>
+        <p class="intro">{{productDetails.productIntro}}</p>
         <p class="store">bookstore</p>
         
         <div class="price">
-          <span>{{productDetails.product_selling_price}}元</span>
+          <span>{{productDetails.productSellingPrice}}元</span>
           <span
-            v-show="productDetails.product_price != productDetails.product_selling_price"
+            v-show="productDetails.productPrice != productDetails.productSellingPrice"
             class="del"
-          >{{productDetails.product_price}}元</span>
+          >{{productDetails.productPrice}}元</span>
         </div>
         <div class="pro-list">
-          <span class="pro-name">{{productDetails.product_name}}</span>
+          <span class="pro-name">{{productDetails.productName}}</span>
           <span class="pro-price">
-            <span>{{productDetails.product_selling_price}}元</span>
+            <span>{{productDetails.productSellingPrice}}元</span>
             <span
-              v-show="productDetails.product_price != productDetails.product_selling_price"
+              v-show="productDetails.productPrice != productDetails.productSellingPrice"
               class="pro-del"
-            >{{productDetails.product_price}}元</span>
+            >{{productDetails.productPrice}}元</span>
           </span>
-          <p class="price-sum">总计 : {{productDetails.product_selling_price}}元</p>
+          <p class="price-sum">总计 : {{productDetails.productSellingPrice}}元</p>
         </div>
         <!-- 内容区底部按钮 -->
         <div class="button">
@@ -96,27 +96,26 @@
 <script>
 import { mapActions } from "vuex";
 import { fetchProductDetails,fetchProductDetailsPictures } from "@/api/product";
-import { addShoppingCart } from "@/api/shoppingcart";
+import { addCart } from "@/api/shoppingcart";
 import { addCollections } from "@/api/collect";
 export default {
   data() {
     return {
       dis: false, // 控制“加入购物车按钮是否可用”
-      //productID: "", // 商品id
-      productID: "",
+      productId: "",// 商品id
       productDetails: "", // 商品详细信息
-      productPicture: "" // 商品图片
+      ProductImage: "" // 商品图片
     };
   },
   // 通过路由获取商品id
   activated() {
-    if (this.$route.query.productID != undefined) {
-      this.productID = this.$route.query.productID;
+    if (this.$route.query.productId != undefined) {
+      this.productId = this.$route.query.productId;
     }
   },
   watch: {
     // 监听商品id的变化，请求后端获取商品数据
-    productID: function(val) {
+    productId: function(val) {
       this.getDetails(val);
       this.getDetailsPicture(val);
     }
@@ -125,9 +124,9 @@ export default {
     ...mapActions(["unshiftShoppingCart", "addShoppingCartNum"]),
     // 获取商品详细信息
     getDetails() {
-      fetchProductDetails(this.productID)
+      fetchProductDetails(this.productId)
         .then(response => {
-          this.productDetails = response.data;
+          this.productDetails = response.data.items;
         })
         .catch(err => {
           return Promise.reject(err);
@@ -135,14 +134,9 @@ export default {
     },
     // 获取商品图片
     getDetailsPicture(val) {
-      // this.$axios
-      //   .post("/product-service/getDetailsPicture", {
-      //     productID: val
-      //   })
       fetchProductDetailsPictures(val)
         .then(response => {
-          this.productPicture = response.ProductPicture;
-          alert(response.data.ProductPicture);
+          this.ProductImage = response.ProductImage;
         })
         .catch(err => {
           return Promise.reject(err);
@@ -155,12 +149,7 @@ export default {
         this.$store.dispatch("setShowLogin", true);
         return;
       }
-      // this.$axios
-      //   .post("/api/user/shoppingCart/addShoppingCart", {
-       //    user_id: this.$store.getters.getUser.user_id,
-      //     product_id: this.productID
-      //   })
-      addShoppingCart(this.$store.getters.getUser.user_id,this.productID)
+      addCart(this.$store.getters.getUser.id,this.productId)
         .then(response => {
           switch (response.code) {
             case 20000:
@@ -170,7 +159,7 @@ export default {
               break;
             case "002":
               // 该商品已经在购物车，数量+1
-              this.addShoppingCartNum(this.productID);
+              this.addShoppingCartNum(this.productId);
               this.notifySucceed(response.message);
               break;
             case "003":
@@ -192,19 +181,14 @@ export default {
         this.$store.dispatch("setShowLogin", true);
         return;
       }
-      // this.$axios
-      //   .post("/api/user/collect/addCollect", {
-      //     user_id: this.$store.getters.getUser.user_id,
-      //     product_id: this.productID
-      //   })
-      addCollections(this.$store.getters.getUser.user_id,this.productID)
-        .then(res => {
-          if (res.data.code == "001") {
+      addCollections(this.$store.getters.getUser.id,this.productId)
+        .then(response => {
+          if (response.code == 20000) {
             // 添加收藏成功
-            this.notifySucceed(res.data.msg);
+            this.notifySucceed(response.message);
           } else {
             // 添加收藏失败
-            this.notifyError(res.data.msg);
+            this.notifyError(response.message);
           }
         })
         .catch(err => {

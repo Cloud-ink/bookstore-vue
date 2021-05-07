@@ -12,7 +12,8 @@
       <div class="topbar">
         <div class="nav">
           <ul>
-            <li v-if="!this.$store.getters.getUser">
+            <!-- <li v-if="!this.$store.getters.getUser"> -->
+              <li v-if="!this.userInfo">
               <el-button type="text" @click="login">登录</el-button>
               <span class="sep">|</span>
               <el-button type="text" @click="register = true">注册</el-button>
@@ -25,7 +26,8 @@
                   <el-button size="mini" type="text" @click="visible = false">取消</el-button>
                   <el-button type="primary" size="mini" @click="logout">确定</el-button>
                 </div>
-                <el-button type="text" slot="reference">{{this.$store.getters.getUser.user_name}}</el-button>
+                <!-- <el-button type="text" slot="reference">{{this.$store.getters.getUser.user_name}}</el-button> -->
+<el-button type="text" slot="reference">{{this.userInfo.username}}</el-button>
               </el-popover>
             </li>
             <li>
@@ -52,24 +54,16 @@
           class="el-menu-demo"
           mode="horizontal"
           active-text-color="#409eff"
-          router
-        >
+          router>
           <div class="logo">
             <router-link to="/">
-              <!-- <img width="200" src="http://localhost:8090/carousel/Capture.PNG" alt />  -->
               <img src="./assets/imgs/logo.png" alt /> 
-              <!-- <img :src="$target +img/carousel/l1.jpg" width="200" alt /> -->
-              <!-- <img src="$target+img/carousel/l1.jpg" alt />  -->
-              <!-- <img :src="$target +img/carousel/l1.jpg" alt /> -->
-              <!-- <img src = "https://cn.bing.com/images/search?q=%e5%9b%be%e7%89%87&id=30F17E5E82E60965C796B028126FB967F991CBBB&FORM=IQFRBA"> -->
-              <!-- <img src="http://localhost:8090/getImg2" alt /> -->
-              <!-- <img src="http://106.15.179.105:3000/public/imgs/phone/picture/Redmi%20K30%205G-3.jpg" alt /> -->
-              <!-- <img src="img/Capture.PNG" alt /> -->
             </router-link>
           </div>
           <el-menu-item index="/">首页</el-menu-item>
           <el-menu-item index="/goods">全部商品</el-menu-item>
           <el-menu-item index="/about">关于我们</el-menu-item>
+          <el-menu-item index="/pay">支付页面</el-menu-item>
 
           <div class="so">
             <el-input placeholder="请输入搜索内容" v-model="search">
@@ -96,7 +90,7 @@
       <!-- 底栏容器 -->
       <el-footer>
         <div class="footer">
-          <div class="ng-promise-box">
+          <!-- <div class="ng-promise-box">
             <div class="ng-promise">
               <p class="text">
                 <a class="icon1" href="javascript:;">7天无理由退换货</a>
@@ -104,7 +98,7 @@
                 <a class="icon3" style="margin-right: 0" href="javascript:;">100%品质保证</a>
               </p>
             </div>
-          </div>
+          </div> -->
           <div class="github">
             <a href="https://github.com/hai-27/vue-store" target="_blank">
               <div class="github-but"></div>
@@ -122,7 +116,6 @@
           </div>
         </div>
       </el-footer>
-      <!-- 底栏容器END -->
     </el-container>
   </div>
 </template>
@@ -131,17 +124,20 @@
 import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
 import { getCart } from "@/api/shoppingcart"
-
+import { fetchLoginInfo } from "@/api/user"
+import cookie from 'js-cookie'
 export default {
   beforeUpdate() {
     this.activeIndex = this.$route.path;
   },
   data() {
     return {
+      carts: [],
       activeIndex: "", // 头部导航栏选中的标签
       search: "", // 搜索条件
       register: false, // 是否显示注册组件
-      visible: false // 是否退出登录
+      visible: false,// 是否退出登录
+      userInfo: null
     };
   },
   created() {
@@ -150,18 +146,8 @@ export default {
       // 如果已经登录，设置vuex登录状态
       this.setUser(JSON.parse(localStorage.getItem("user")));
     }
-    /* window.setTimeout(() => {
-      this.$message({
-        duration: 0,
-        showClose: true,
-        message: `
-        <p>如果觉得这个项目还不错，</p>
-        <p style="padding:10px 0">您可以给项目源代码仓库点Star支持一下，谢谢！</p>
-        <p><a href="https://github.com/hai-27/vue-store" target="_blank">Github传送门</a></p>`,
-        dangerouslyUseHTMLString: true,
-        type: "success"
-      });
-    }, 1000 * 60); */
+    //获取用户信息
+    this.getUserInfo()
   },
   computed: {
     ...mapGetters(["getUser", "getNum"])
@@ -174,19 +160,15 @@ export default {
         this.setShoppingCart([]);
       } else {
         // 用户已经登录,获取该用户的购物车信息
-        // this.$axios
-        //   .post("/api/user/shoppingCart/getShoppingCart", {
-        //     user_id: val.user_id
-        //   })
-        getCart(this.$store.getters.getUser.user_id)
+        getCart(this.$store.getters.getUser.id)
           .then(response => {
             if (response.code === 20000) {
               // 001 为成功, 更新vuex购物车状态
-              this.setShoppingCart(response.data);
-             
+              let cart = response.data.carts; 
+              this.$store.dispatch('setShoppingCart', cart);
             } else {
               // 提示失败信息
-              this.notifyError(response.msg);
+              this.notifyError(response.message);
             }
           })
           .catch(err => {
@@ -209,6 +191,10 @@ export default {
       // 清空vuex登录信息
       this.setUser("");
       this.notifySucceed("成功退出登录");
+      // 清空cookie
+      cookie.set('bookstore','',{ domain: 'localhost'})
+      //跳转页面
+      window.location.href = '/'
     },
     // 接收注册子组件传过来的数据
     isRegister(val) {
@@ -221,6 +207,24 @@ export default {
         this.$router.push({ path: "/goods", query: { search: this.search } });
         this.search = "";
       }
+    },
+    //获取用户信息
+    getUserInfo() {
+      //如果无token
+      if(!cookie.get('bookstore')){
+        return 
+      }
+      //如果token存在
+      fetchLoginInfo().then(response => {
+        //渲染页面
+        this.userInfo = response.data.userInfo;
+        //存到本地
+        let user = JSON.stringify(this.userInfo);
+        localStorage.setItem("user",user);
+        this.$store.dispatch('setUser',user);
+        let users = this.$store.getters.getUser;
+        alert(users.id)
+      })
     }
   }
 };

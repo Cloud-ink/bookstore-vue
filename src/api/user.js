@@ -1,8 +1,9 @@
 import request from '@/utils/request'
+//import cookie from 'js-cookie'
 
 export function fetchRegister(userName,pass){
   return request({
-    url: '/user-service/register',
+    url: '/user-service/user/register',
     method: 'post',
     params: {userName,pass}
   })
@@ -10,16 +11,25 @@ export function fetchRegister(userName,pass){
 
 export function findUserName(userName){
   return request({
-    url: '/user-service/findUserName',
+    url: '/user-service/user/findUserName',
     method: 'post',
     params: {userName}
   })
 }
-
-export function fetchLogin(userName,pass){
+//登录
+export function fetchLogin(LoginUser){
   return request({
-    url: '/user-service/login',
+    url: '/user-service/user/login',
     method: 'post',
-    params: {userName,pass}
+    data: LoginUser
+  })
+}
+
+//登录 headers中传值
+export function fetchLoginInfo(){
+  return request({
+    url: '/user-service/user/info',
+    method: 'get',
+    //headers: {'token':cookie.get('bookstore')}
   })
 }

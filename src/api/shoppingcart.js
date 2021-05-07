@@ -1,33 +1,41 @@
 import request from '@/utils/request'
 
-export function getCart(user_id){
+export function getCart(userId){
   return request({
-    url: '/cart-service/getShoppingCart',
+    url: '/cart-service/cart/getCart',
     method: 'post',
-    params:{user_id}
+    params:{userId}
   })
 }
 
-export function addShoppingCart(user_id,productID){
+export function addCart(userId,productId){
   return request({
-    url: '/cart-service/addShoppingCart',
+    url: '/cart-service/cart/addCart',
     method: 'post',
-    params:{user_id,productID}
+    params:{userId,productId}
   })
 }
 
-export function updateCart(user_id,productID,currentValue){
+export function updateCart(userId,productId,currentValue){
   return request({
-    url: '/cart-service/updateShoppingCart',
+    url: '/cart-service/cart/updateCart',
     method: 'post',
-    params:{user_id,productID,currentValue}
+    params:{userId,productId,currentValue}
   })
 }
 
-export function deleteCart(user_id,product_id){
+export function deleteCart(userId,productId){
   return request({
-    url: '/cart-service/deleteShoppingCart',
+    url: '/cart-service/cart/deleteCart',
     method: 'post',
-    params:{user_id,product_id}
+    params:{userId,productId}
+  })
+}
+
+export function batchDelete(idList){
+  return request({
+    url: '/cart-service/cart/deleteCarts',
+    method: 'post',
+    data: idList
   })
 }

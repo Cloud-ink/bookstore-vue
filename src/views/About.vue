@@ -1,44 +1,73 @@
 <template>
-  <div class="about">
-    <div>
-      <el-upload
-  class="upload-demo"
-  action="https://jsonplaceholder.typicode.com/posts/"
-  :on-preview="handlePreview"
-  :on-remove="handleRemove"
-  :file-list="fileList"
-  list-type="picture">
-  <el-button size="small" type="primary">点击上传</el-button>
-  <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-</el-upload>
-    </div>
-  </div>
+<div class = "demo">
+  <el-upload
+    class="avatar-uploader"
+    action="http://localhost:8011/admin/upload?module=bookstore"
+    :show-file-list="false"
+    :on-success="handleAvatarSuccess"
+    :on-error="handleAvatarError"
+    :before-upload="beforeAvatarUpload">
+    <img v-if="carousel.imageUrl" :src="carousel.imageUrl" class="avatar">
+    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+  </el-upload>
+</div>
 </template>
+
 <script>
- export default {
+  export default {
     data() {
       return {
-        fileList: [{name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}, {name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}]
+        //轮播图对象
+        carousel:{
+          imageUrl: ''
+        },
       };
     },
     methods: {
-      handleRemove(file, fileList) {
-        console.log(file, fileList);
+      //文件上传成功
+      handleAvatarSuccess(response) {
+        //如果上传成功
+        if(response.success){
+            console.log(response)
+            //this.imageUrl = URL.createObjectURL(file.raw);
+            this.carousel.imageUrl = response.data.url
+          //强制重新渲染
+          this.$forceUpdate()
+        //如果上传失败
+        }else{
+          this.$message.error('上传失败！非20000')
+        }
       },
-      handlePreview(file) {
-        console.log(file);
+      //连接失败
+      handleAvatarError(){
+          this.$message.error('连接失败！非20000')
+      },
+      //文件上传前校验
+      beforeAvatarUpload(file) {
+        const isJPG = file.type === 'image/jpeg';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是 JPG 格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+        return isJPG && isLt2M;
       }
     }
   }
 </script>
-<style scoped>
-.about {
-  background-color: #0d3edd;
-  height: 1000px;
-  width: 1000px;
-  margin-left: 150px;
-}
-.about .avatar-uploader .el-upload {
+
+<style>
+  .demo{
+    margin-left: 20%;
+    margin-right: 20%;
+    height: 1000px;
+    background-color: #409EFF;
+    border-color: #409EFF;
+  }
+  .avatar-uploader .el-upload {
     border: 1px dashed #d9d9d9;
     border-radius: 6px;
     cursor: pointer;
@@ -61,37 +90,4 @@
     height: 178px;
     display: block;
   }
-.about .about-header {
-  height: 64px;
-  background-color: #fff;
-  border-bottom: 2px solid #ff6700;
-}
-.about .about-header .about-title {
-  width: 1225px;
-  margin-left: 100px;
-  height: 164px;
-  line-height: 64px;
-  font-size: 28px;
-}
-.about .content {
-  padding: 20px 0;
-  width: 1225px;
-  margin: 0 auto;
-}
-.about .content .goods-list {
-  margin-left: -13.7px;
-  overflow: hidden;
-}
-.about .about-content {
-  width: 1225px;
-  margin: 0 auto;
-  background-color: #fff;
-}
-.from-picture{
-  width: 1225px;
-  margin: 0 auto;
-  height: 364px;
-  font-size: 28px;
-  background-color: #ff6700;
-}
 </style>

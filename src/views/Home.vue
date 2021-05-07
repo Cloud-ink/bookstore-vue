@@ -3,9 +3,9 @@
     <!-- 轮播图 -->
     <div class="block">
       <el-carousel height="460px">
-        <el-carousel-item v-for="item in carousel" :key="item.carousel_id">
-          <!-- <img style="height:460px;" :src="$target + item.imgPath" :alt="item.describes" /> -->
-          <img style="height:460px;" :src="item.carousel_img" :alt="item.carousel_name"/>
+        <el-carousel-item v-for="item in carousel" :key="item.carouselId">
+          <!-- <img style="height:460px;" :src="$targetImg + item.imgPath" :alt="item.describes" /> -->
+          <img style="height:460px;" :src="item.carouselImg" :alt="item.carouselName"/>
         </el-carousel-item>
       </el-carousel>
     </div>
@@ -56,7 +56,6 @@
             </div>
           </div>
         </div>
-
         <!-- 配件商品展示区域 -->
         <div class="accessory" id="promo-menu">
           <div class="box-hd">
@@ -92,15 +91,15 @@ import { fetchCarousel,fetchProductByCategoryName } from "@/api/product"
 export default {
   data() {  
     return {
+      PromoProduct:{
+        categoryName:""
+      },
       carousel: "", // 轮播图数据
       teacherList: "", // 教辅书列表
       childerList: "", // 儿童书列表
       novelList: "", // 小说列表
-      //applianceHotList: "", //热门家电商品列表
-      //accessoryList: "", //配件商品列表
       accessoryHotList: "", //热门配件商品列表
-      protectingShellList: "", // 保护套商品列表
-      //chargerList: "", //充电器商品列表
+      protectingShellList: "", // 保护套商品列表Pro
       applianceActive: 1, // 家电当前选中的商品分类
       accessoryActive: 1 // 配件当前选中的商品分类
     };
@@ -185,7 +184,7 @@ export default {
     },
     // 获取各类商品数据方法封装
     getPromo(categoryName, val, api) {
-       api = api != undefined ? api : "/product-service/getPromoProduct";
+       api = api != undefined ? api : "/product-service/category/listPromosByCategoryName";
       // this.$axios
       //   .post(api, {
       //     categoryName
@@ -193,7 +192,7 @@ export default {
       //if(api=undefined){
         fetchProductByCategoryName(api,categoryName)
         .then(response => {
-          this[val] = response.data;
+          this[val] = response.data.PromoProducts;
         })
         .catch(err => {
           return Promise.reject(err);

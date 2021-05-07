@@ -7,7 +7,10 @@
  */
 export default {
   state: {
-    user: "", // 登录的用户
+    user: {
+      id: null,
+      username: null,
+      avatar: null}, // 登录的用户
     showLogin: false // 用于控制是否显示登录组件
   },
   getters: {

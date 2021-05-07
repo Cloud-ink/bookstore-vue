@@ -18,9 +18,9 @@
         <el-tabs v-model="activeName" type="card">
           <el-tab-pane
             v-for="item in categoryList"
-            :key="item.category_id"
-            :label="item.category_name"
-            :name="''+item.category_id"
+            :key="item.categoryId"
+            :label="item.categoryName"
+            :name="''+item.categoryId"
           />
         </el-tabs>
       </div>
@@ -36,10 +36,12 @@
       <div class="pagination">
         <el-pagination
           background
-          layout="prev, pager, next"
+          layout="total,sizes,prev, pager, next,jumper"
           :page-size="pageSize"
+          :page-sizes="[5,8,16]"
           :total="total"
           @current-change="currentChange"
+          @size-change="changePageSize"
         ></el-pagination>
       </div>
       <!-- 分页END -->
@@ -49,19 +51,19 @@
 </template>
 <script>
 import { fetchCategory } from "@/api/product"
-import { fetchAllProduct,fetchProductByCearch } from "@/api/product"
+import { fetchAllProduct,fetchProductBySearch } from "@/api/product"
 export default {
   data() {
     return {
-      categoryList: null, //分类列表
-      categoryID: 0, // 分类id
-      product: "", // 商品列表
+      categoryList: null,  //分类列表
+      categoryID: 0,       // 分类id
+      product: "",         // 商品列表
       productList: "",
-      total: 0, // 商品总量
-      pageSize: 15, // 每页显示的商品数量
-      currentPage: 1, //当前页码
-      activeName: "0", // 分类列表当前选中的id
-      search: "" // 搜索条件
+      total: 0,            // 商品总量
+      pageSize: 8,        // 每页显示的商品数量，默认为10
+      currentPage: 1,      //当前页码
+      activeName: "0",     // 分类列表当前选中的id
+      search: ""           // 搜索条件
     };
   },
   created() {
@@ -157,14 +159,20 @@ export default {
       }
       this.backtop();
     },
+    //修改每页记录数
+    changePageSize(size){
+      console.log('size'+size)
+      this.pageSize = size
+      this.getData()
+    },
     // 向后端请求分类列表数据
     getCategory() {
       fetchCategory().then(response => {
         const val = {
-          category_id: 0,
-          category_name: "全部"
+          categoryId: 0,
+          categoryName: "全部"
           };
-        const cate = response.category;
+        const cate = response.data;
           cate.unshift(val);
           this.categoryList = cate;
       }).catch(err => {
@@ -175,8 +183,8 @@ export default {
     getData() {
       // 如果分类列表为空则请求全部商品数据，否则请求分类商品数据
       const api = this.categoryID == 0
-          ? "/product-service/getAllProduct"
-          : "/product-service/getProductByCategory";
+          ? "/product-service/product/getAllProduct"
+          : "/product-service/category/getProductByCategory";
       fetchAllProduct(api,this.categoryID,this.currentPage,this.pageSize).then(response=>{
             this.product =response.data.items;
             this.total = response.data.total;
@@ -186,7 +194,7 @@ export default {
     },
     // 通过搜索条件向后端请求商品数据
     getProductBySearch() {
-      fetchProductByCearch(this.search,this.currentPage,this.pageSize)
+      fetchProductBySearch(this.search,this.currentPage,this.pageSize)
         .then(response => {
           this.product = response.data.items;
           this.total = response.data.total;

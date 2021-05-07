@@ -31,16 +31,11 @@ export default {
     };
   },
   activated() {
-    // 获取收藏数据
-    // this.$axios
-    //   .post("/api/user/collect/getCollect", {
-    //     user_id: this.$store.getters.getUser.user_id
-    //   })
-    getCollect(this.$store.getters.getUser.user_id)
+    getCollect(this.$store.getters.getUser.id)
       .then(response => {
        if (response.code === 20000) {
         //   this.collectList = res.data.collectList;;
-        this.collectList=response.data;
+        this.collectList=response.data.collects;
        }
       })
       .catch(err => {

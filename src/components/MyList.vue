@@ -1,24 +1,24 @@
 <template>
   <div id="myList" class="myList">
     <ul>
-      <li v-for="item in list" :key="item.product_id">
+      <li v-for="item in list" :key="item.productId">
         <el-popover placement="top">
           <p>确定删除吗？</p>
           <div style="text-align: right; margin: 10px 0 0">
-            <el-button type="primary" size="mini" @click="deleteCollect(item.product_id)">确定</el-button>
+            <el-button type="primary" size="mini" @click="deleteCollect(item.productId)">确定</el-button>
           </div>
           <i class="el-icon-close delete" slot="reference" v-show="isDelete"></i>
         </el-popover>
-        <router-link :to="{ path: '/goods/details', query: {productID:item.product_id} }">
-          <img :src="item.product_image" alt />
-          <h2>{{item.product_name}}</h2>
-          <h3>{{item.product_subtitle}}</h3>
+        <router-link :to="{ path: '/goods/details', query: {productId:item.productId} }">
+          <img :src="item.productImage" alt />
+          <h2>{{item.productName}}</h2>
+          <h3>{{item.productSubtitle}}</h3>
           <p>
-            <span>{{item.product_selling_price}}元</span>
+            <span>{{item.productSellingPrice}}元</span>
             <span
-              v-show="item.product_price != item.product_selling_price"
+              v-show="item.productPrice != item.productSellingPrice"
               class="del"
-            >{{item.product_price}}元</span>
+            >{{item.productPrice}}元</span>
           </p>
         </router-link>
       </li>
@@ -57,13 +57,8 @@ export default {
     }
   },
   methods: {
-    deleteCollect(product_id) {
-      // this.$axios
-      //   .post("/api/user/collect/deleteCollect", {
-      //     user_id: this.$store.getters.getUser.user_id,
-      //     product_id: product_id
-      //   })
-      deleteCollections(this.$store.getters.getUser.user_id,product_id)
+    deleteCollect(productId) {
+      deleteCollections(this.$store.getters.getUser.id,productId)
         .then(Response => {
           switch (Response.code) {
             case 20000:
@@ -71,16 +66,16 @@ export default {
               // 删除删除列表中的该商品信息
               for (let i = 0; i < this.list.length; i++) {
                 const temp = this.list[i];
-                if (temp.product_id == product_id) {
+                if (temp.productId == productId) {
                   this.list.splice(i, 1);
                 }
               }
               // 提示删除成功信息
-              this.notifySucceed(Response.msg);
+              this.notifySucceed(Response.message);
               break;
             default:
               // 提示删除失败信息
-              this.notifyError(Response.msg);
+              this.notifyError(Response.message);
           }
         })
         .catch(err => {
